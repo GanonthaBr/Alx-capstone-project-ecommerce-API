@@ -21,9 +21,9 @@ class RegisterSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id','username','email', 'followers','bio','profile_picture','following')
+        fields = ('id','username','email','bio','profile_picture','phone')
         read_only_fields = [
-            'id','followers','following'
+            'id',
         ]
 
 class LoginSerializer(serializers.Serializer):
@@ -34,6 +34,5 @@ class LoginSerializer(serializers.Serializer):
         user = authenticate(**data)
         if user and user.is_active:
             return user
-        print(user)
         raise serializers.ValidationError('Wrong credentials')
     
