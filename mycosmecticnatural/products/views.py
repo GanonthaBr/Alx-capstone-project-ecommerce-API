@@ -6,7 +6,9 @@ from .models import Product, Category
 from .serializers import ProductSerializer, CategorySerializer
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import PostPagination
+from .filters import ProductFilter
 # Create your views here.
 class CategoriesViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -26,9 +28,10 @@ class ProductsViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    filter_backends = [SearchFilter]
+    filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['name__icontains', 'category__name__icontains']
     pagination_class = PostPagination
+    filterset_class = ProductFilter
 
     def post(self, request):
         serialized_data = ProductSerializer(data = request.data)
