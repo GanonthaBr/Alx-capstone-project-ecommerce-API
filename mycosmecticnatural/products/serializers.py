@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Category, Wishlist
+from .models import Product, Category, Wishlist, Cart
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,4 +27,9 @@ class WishlistSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Product is already in wishlist')
         return super().validate(attrs)
     
-    
+
+class CartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = '__all__'
+    # if product exists, increase quantity
