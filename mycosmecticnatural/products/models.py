@@ -1,12 +1,5 @@
 from django.db import models
-
-# Create your models here.
-'''
-    Each product should have the following attributes: Name, Description, Price, Category, Stock Quantity, Image URL, and Created Date.
-Ensure validation for required fields like Price, Name, and Stock Quantity.
-Make sure the Stock Quantity is automatically reduced when an order is placed (future enhancement or consider as optional for now).
-'''
-
+from accounts.models import CustomUser
 class Category(models.Model):
     name = models.CharField(max_length=50)
 
@@ -24,3 +17,11 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+    
+class Wishlist(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='wishlist')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.product.name
