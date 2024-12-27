@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Category, Wishlist, Cart
+from .models import Product, Category, Wishlist, Cart, CartItem
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,3 +33,8 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = '__all__'
     # if product exists, increase quantity
+
+class CartItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = '__all__'

@@ -2,8 +2,8 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import permissions, status
 from rest_framework.response import Response
-from .models import Product, Category, Wishlist, Cart
-from .serializers import ProductSerializer, CategorySerializer, WishlistSerializer, CartSerializer
+from .models import Product, Category, Wishlist, Cart, CartItem
+from .serializers import ProductSerializer, CategorySerializer, WishlistSerializer, CartSerializer, CartItemSerializer
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.filters import SearchFilter
@@ -83,23 +83,33 @@ def list_cart_products(request):
         return Response({"message":"Your cart is empty!"},status=status.HTTP_404_NOT_FOUND)
     return Response(serialized_data.data, status=status.HTTP_200_OK)
 
-@api_view(['POST'])
-@permission_classes([permissions.IsAuthenticated])
-def add_to_cart(request, product_id):
-    product = Product.objects.get(id=product_id)
-    cart_product = Cart.objects.filter(product=product_id, user=request.user)
+class AddToCart(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def post(self, request, product_id):
+        product = Product.objects.get(id=product_id)
+        cart, created = Cart.objects.get_or_create(user=request.user)
 
-    if cart_product:
-        if product.stock_quantity == 0:
-            return Response({"message":"Product out of stock!"}, status=status.HTTP_400_BAD_REQUEST)
-        product.stock_quantity -= 1
-        cart_product.quantity += 1
-        serialized_data = CartSerializer(data={'product':product.id, 'user':request.user.id, 'quantity': cart_product.quantity })
-    if product.stock_quantity == 0:
-        return Response({"message":"Product out of stock!"}, status=status.HTTP_400_BAD_REQUEST)
-    serialized_data = CartSerializer(data={'product':product.id, 'user':request.user.id, 'quantity':1})
-    if serialized_data.is_valid():
-        serialized_data.save()
-        return Response({"message":"Product added to cart!"}, status=status.HTTP_201_CREATED)
-    else:
-        return Response(serialized_data.errors, status=status.HTTP_400_BAD_REQUEST)
+        #create cart item
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+        cart_item.quantity += int(request.data.get('quantity',1))
+        cart_item.save()
+        cart_serializer = CartSerializer(cart)
+        return Response({"message":"Product added to cart!"},cart_serializer.data,status=status.HTTP_201_CREATED)
+    
+
+class RemoveFromCart(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, product_id):
+        product = CartItem.objects.get(product=product_id, cart__user=request.user)
+        product.delete()
+        return Response({"message":"Product removed from cart!"},status=status.HTTP_204_NO_CONTENT)
+    
+class CartDetails(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        cart = Cart.objects.get(user=request.user)
+        cart_items = CartItem.objects.filter(cart=cart)
+        serialized_data = CartItemSerializer(cart_items, many=True)
+        return Response(serialized_data.data, status=status.HTTP_200_OK)
