@@ -87,7 +87,6 @@ class AddToCart(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self, request, product_id):
         product = Product.objects.get(id=product_id)
-
         #get or create a Cart for this user       
         cart,created= Cart.objects.get_or_create(user=request.user)
         
@@ -124,3 +123,18 @@ class CartDetails(APIView):
         cart_items = CartItem.objects.filter(cart=cart)
         serialized_data = CartItemSerializer(cart_items, many=True)
         return Response(serialized_data.data, status=status.HTTP_200_OK)
+    
+class CartUpdate(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def put(self,request,product_id):
+        cart = Cart.objects.get(user=request.user)
+        product = Product.objects.get(id=product_id)
+
+        cart_item = CartItem.objects.get(cart=cart,product=product)
+        quantity = request.query_params.get('quantity')
+        cart_item.delete()
+        cart_item = CartItemSerializer(data={"quantity":quantity,"cart":cart.id,"product":product.id},partial=True)
+        if cart_item.is_valid():
+            cart_item.save()
+        return Response(cart_item.data,status=status.HTTP_202_ACCEPTED)
