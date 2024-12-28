@@ -56,20 +56,26 @@ def list_wishlist_products(request):
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def add_to_wishlist(request, product_id):
-    product = Product.objects.get(id=product_id)
-    serialized_data = WishlistSerializer(data={'product':product.id, 'user':request.user.id})
-    if serialized_data.is_valid():
-        serialized_data.save()
-        return Response(serialized_data.data, status=status.HTTP_201_CREATED)
-    else:
-        return Response(serialized_data.errors, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        product = Product.objects.get(id=product_id)
+        serialized_data = WishlistSerializer(data={'product':product.id, 'user':request.user.id})
+        if serialized_data.is_valid():
+            serialized_data.save()
+            return Response(serialized_data.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serialized_data.errors, status=status.HTTP_400_BAD_REQUEST)
+    except:
+        return Response({"message":"Something went wrong!!"})
 
 @api_view(['DELETE'])
 @permission_classes([permissions.IsAuthenticated])
 def remove_from_wishlist(request, product_id):
-    product = Wishlist.objects.get(product=product_id, user=request.user)
-    product.delete()
-    return Response({"message":"Product removed from wish list!"},status=status.HTTP_204_NO_CONTENT)
+    try:
+        product = Wishlist.objects.get(product=product_id, user=request.user)
+        product.delete()
+        return Response({"message":"Product removed from wish list!"},status=status.HTTP_204_NO_CONTENT)
+    except:
+        return Response({"message":"Something went wrong!!"})
  
 
 
