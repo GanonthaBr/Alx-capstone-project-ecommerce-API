@@ -87,14 +87,25 @@ class AddToCart(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self, request, product_id):
         product = Product.objects.get(id=product_id)
-        cart, created = Cart.objects.get_or_create(user=request.user)
 
-        #create cart item
-        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-        cart_item.quantity += int(request.data.get('quantity',1))
-        cart_item.save()
-        cart_serializer = CartSerializer(cart)
-        return Response({"message":"Product added to cart!"},cart_serializer.data,status=status.HTTP_201_CREATED)
+        #get or create a Cart for this user       
+        cart,created= Cart.objects.get_or_create(user=request.user)
+        
+        #check if this cart already contains this product
+        if CartItem.objects.filter(product=product):
+            #get cart item containing this product
+            cart_item = CartItem.objects.get(cart=cart,product=product)
+            cart_item.delete() #delete it in order to update the quantity
+            cart_item = CartItemSerializer(data={"cart":cart.id,"product":product.id, "quantity":cart_item.quantity+1}, partial=True)
+            if cart_item.is_valid():
+                cart_item.save()
+            return Response(cart_item.data,status=status.HTTP_201_CREATED)
+        else:
+            #add cart item to cart of does not exist
+            cart_item = CartItemSerializer(data={"cart":cart.id,"product":product.id, "quantity":1})
+            if cart_item.is_valid():
+                cart_item.save()
+            return Response(cart_item.data,status=status.HTTP_201_CREATED)
     
 
 class RemoveFromCart(APIView):
