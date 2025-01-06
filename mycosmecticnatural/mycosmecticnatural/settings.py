@@ -76,7 +76,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mycosmecticnatural.wsgi.application'
 
-
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5500",
+]
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -149,6 +151,3 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5500",
-]
