@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-sn$2nm3&4d^(yat_g6ldb=(^o&)w(swvxj=2p*+=eg%)gah2t_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['GanonthaBr.pythonanywhere.com']
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
@@ -80,8 +80,12 @@ WSGI_APPLICATION = 'mycosmecticnatural.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'GanonthaBr$mycosmetics_db',
+        'USER': 'GanonthaBr',
+        'PASSWORD': 'mycosmeticsDB$100$',
+        'HOST': 'GanonthaBr.mysql.pythonanywhere-services.com',  # e.g., 'yourusername.mysql.pythonanywhere-services.com'
+        'PORT': '3306',
     }
     # 'default':{
     #     'ENGINE':'django.db.backends.mysql',
@@ -143,3 +147,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5500",
+]
